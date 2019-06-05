@@ -59,12 +59,12 @@ class ReactImageLightbox extends Component {
   static getTransform({ x = 0, y = 0, zoom = 1, width, targetWidth, widestImageDimension }) {
     let nextX = x;
     const windowWidth = getWindowWidth();
-    if (width > windowWidth) {
+    if (widestImageDimension > windowWidth) {
       nextX += (windowWidth - widestImageDimension) / 2;
     }
     let scaleFactor = zoom;
     if (width && targetWidth) {
-      scaleFactor = zoom * (targetWidth / widestImageDimension);
+      scaleFactor = zoom * (targetWidth / width);
     }
 
     return {
@@ -275,7 +275,7 @@ class ReactImageLightbox extends Component {
   }
 
   getRotatedDimensions(width, height) {
-    const imageRotationDeg = this.props.imageRotationDeg % 360;
+    const imageRotationDeg = (this.props.imageRotationDeg % 180) + 180;
 
     return {
       height: height * Math.abs(Math.cos(imageRotationDeg)) + width * Math.abs(Math.sin(imageRotationDeg)),
