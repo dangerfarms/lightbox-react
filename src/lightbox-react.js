@@ -1348,7 +1348,11 @@ class ReactImageLightbox extends Component {
         }
 
         displayItems.push(
-          <div className={`${imageClass} ril__image ril__imageDiscourager`} style={{ ...restImageStyle, transform: transformParts.translate3d }}>
+          <div
+            className={`${imageClass} ril__image ril__imageDiscourager`}
+            key={imageSrc + keyEndings[srcType]}
+            style={{ ...restImageStyle, transform: transformParts.translate3d }}
+          >
             <img
               {...(imageCrossOrigin ? { crossOrigin: imageCrossOrigin } : {})}
               className={`${imageClass} ril__image`}
@@ -1357,7 +1361,6 @@ class ReactImageLightbox extends Component {
               onDragStart={e => e.preventDefault()}
               style={{ ...restImageStyle, transform: `rotateZ(${this.props.imageRotationDeg}deg) ${transformParts.scale3d}`, transition: "transform .3s" }}
               src={imageSrc}
-              key={imageSrc + keyEndings[srcType]}
               alt={typeof imageTitle === 'string' ? imageTitle : translate('Image')}
               draggable={false}
             />
