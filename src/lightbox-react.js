@@ -56,15 +56,15 @@ class ReactImageLightbox extends Component {
   }
 
   // Request to transition to the previous image
-  static getTransform({ x = 0, y = 0, zoom = 1, width, targetWidth }) {
+  static getTransform({ x = 0, y = 0, zoom = 1, width, targetWidth, widestImageDimension }) {
     let nextX = x;
     const windowWidth = getWindowWidth();
     if (width > windowWidth) {
-      nextX += (windowWidth - width) / 2;
+      nextX += (windowWidth - widestImageDimension) / 2;
     }
     let scaleFactor = zoom;
     if (width && targetWidth) {
-      scaleFactor = zoom * (targetWidth / width);
+      scaleFactor = zoom * (targetWidth / widestImageDimension);
     }
 
     return {
@@ -274,35 +274,64 @@ class ReactImageLightbox extends Component {
     }, 100);
   }
 
+  getRotatedDimensions(width, height) {
+    const imageRotationDeg = this.props.imageRotationDeg % 360;
+
+    return {
+      height: height * Math.abs(Math.cos(imageRotationDeg)) + width * Math.abs(Math.sin(imageRotationDeg)),
+      width: width * Math.abs(Math.cos(imageRotationDeg)) + height * Math.abs(Math.sin(imageRotationDeg)),
+    }
+  }
+
   // Get info for the best suited image to display with the given srcType
   getBestImageForType(srcType) {
     let imageSrc = this.props[srcType];
     let fitSizes = {};
+    let widestImageDimension = 0;
 
     if (this.isImageLoaded(imageSrc)) {
       // Use full-size image if available
-      fitSizes = this.getFitSizes(
+      const { width, height } = this.getRotatedDimensions(
+        this.imageCache[imageSrc].width,
+        this.imageCache[imageSrc].height,
+      );
+
+      fitSizes = this.getFitSizes(width, height);
+
+      widestImageDimension = Math.max(
         this.imageCache[imageSrc].width,
         this.imageCache[imageSrc].height,
       );
     } else if (this.isImageLoaded(this.props[`${srcType}Thumbnail`])) {
       // Fall back to using thumbnail if the image has not been loaded
       imageSrc = this.props[`${srcType}Thumbnail`];
-      fitSizes = this.getFitSizes(
+
+      const { width, height } = this.getRotatedDimensions(
         this.imageCache[imageSrc].width,
         this.imageCache[imageSrc].height,
+      );
+
+      fitSizes = this.getFitSizes(
+        width,
+        height,
         true,
       );
     } else {
       return null;
     }
 
+    const { width, height } = this.getRotatedDimensions(
+      this.imageCache[imageSrc].width,
+      this.imageCache[imageSrc].height,
+    );
+
     return {
       src: imageSrc,
-      height: this.imageCache[imageSrc].height,
-      width: this.imageCache[imageSrc].width,
+      height,
+      width,
       targetHeight: fitSizes.height,
       targetWidth: fitSizes.width,
+      widestImageDimension,
     };
   }
 
@@ -343,20 +372,25 @@ class ReactImageLightbox extends Component {
     const boxSize = this.getLightboxRect();
     const zoomMultiplier = this.getZoomMultiplier(zoomLevel);
 
+    const {
+      width: currentImageWidth,
+      height: currentImageHeight,
+    } = this.getRotatedDimensions(currentImageInfo.width, currentImageInfo.height);
+
     let maxX = 0;
-    if (zoomMultiplier * currentImageInfo.width - boxSize.width < 0) {
+    if (zoomMultiplier * currentImageWidth - boxSize.width < 0) {
       // if there is still blank space in the X dimension, don't limit except to the opposite edge
-      maxX = (boxSize.width - zoomMultiplier * currentImageInfo.width) / 2;
+      maxX = (boxSize.width - zoomMultiplier * currentImageWidth) / 2;
     } else {
-      maxX = (zoomMultiplier * currentImageInfo.width - boxSize.width) / 2;
+      maxX = (zoomMultiplier * currentImageWidth - boxSize.width) / 2;
     }
 
     let maxY = 0;
-    if (zoomMultiplier * currentImageInfo.height - boxSize.height < 0) {
+    if (zoomMultiplier * currentImageHeight - boxSize.height < 0) {
       // if there is still blank space in the Y dimension, don't limit except to the opposite edge
-      maxY = (boxSize.height - zoomMultiplier * currentImageInfo.height) / 2;
+      maxY = (boxSize.height - zoomMultiplier * currentImageHeight) / 2;
     } else {
-      maxY = (zoomMultiplier * currentImageInfo.height - boxSize.height) / 2;
+      maxY = (zoomMultiplier * currentImageHeight - boxSize.height) / 2;
     }
 
     return {
@@ -1304,19 +1338,29 @@ class ReactImageLightbox extends Component {
           </div>,
         );
       } else {
+        const { transform, ...restImageStyle } = imageStyle;
+
+        // Split the css transform into parts to be applied to the container div and img separately
+        const transformParts = {
+          translate3d: /translate3d\([^)]+\)/.exec(transform)[0],
+          scale3d: /scale3d\([^)]+\)/.exec(transform)[0],
+        }
+
         displayItems.push(
-          <img
-            {...(imageCrossOrigin ? { crossOrigin: imageCrossOrigin } : {})}
-            className={`${imageClass} ril__image`}
-            onDoubleClick={this.handleImageDoubleClick}
-            onWheel={this.handleImageMouseWheel}
-            onDragStart={e => e.preventDefault()}
-            style={imageStyle}
-            src={imageSrc}
-            key={imageSrc + keyEndings[srcType]}
-            alt={typeof imageTitle === 'string' ? imageTitle : translate('Image')}
-            draggable={false}
-          />,
+          <div className={`${imageClass} ril__image ril__imageDiscourager`} style={{ ...restImageStyle, transform: transformParts.translate3d }}>
+            <img
+              {...(imageCrossOrigin ? { crossOrigin: imageCrossOrigin } : {})}
+              className={`${imageClass} ril__image`}
+              onDoubleClick={this.handleImageDoubleClick}
+              onWheel={this.handleImageMouseWheel}
+              onDragStart={e => e.preventDefault()}
+              style={{ ...restImageStyle, transform: `rotateZ(${this.props.imageRotationDeg % 360}deg) ${transformParts.scale3d}` }}
+              src={imageSrc}
+              key={imageSrc + keyEndings[srcType]}
+              alt={typeof imageTitle === 'string' ? imageTitle : translate('Image')}
+              draggable={false}
+            />
+          </div>
         );
       }
     };
@@ -1368,7 +1412,6 @@ class ReactImageLightbox extends Component {
       x: -1 * offsetX,
       y: -1 * offsetY,
       zoom: zoomMultiplier,
-      transform: `rotateZ(${this.props.imageRotationDeg}deg)`
     });
     // Previous Image (displayed on the left)
     addItem('prevSrc', 'ril-image-prev ril__imagePrev', {
