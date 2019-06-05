@@ -1364,10 +1364,11 @@ class ReactImageLightbox extends Component {
       x: boxSize.width,
     });
     // Main Image
-    addItem('mainSrc', 'ril-image-current', {
+    addItem('mainSrc', `ril-image-current`, {
       x: -1 * offsetX,
       y: -1 * offsetY,
       zoom: zoomMultiplier,
+      transform: `rotateZ(${this.props.imageRotationDeg}deg)`
     });
     // Previous Image (displayed on the left)
     addItem('prevSrc', 'ril-image-prev ril__imagePrev', {
@@ -1677,6 +1678,8 @@ ReactImageLightbox.propTypes = {
 
   wrapperClassName: PropTypes.string,
 
+  imageRotationDeg: PropTypes.number,
+
   //-----------------------------
   // Other
   //-----------------------------
@@ -1716,6 +1719,7 @@ ReactImageLightbox.defaultProps = {
   discourageDownloads: false,
   enableZoom: true,
   imagePadding: 10,
+  imageRotationDeg: 0,
   imageCrossOrigin: null,
   keyRepeatKeyupBonus: 40,
   keyRepeatLimit: 180,
