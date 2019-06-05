@@ -12,6 +12,8 @@ export interface ILightBoxProps {
     onMoveNextRequest?(): void;
     onImageLoad?(): void;
     onImageLoadError?(): void;
+    onRotateAntiClockwise?(): void;
+    onRotateClockwise?(): void;
     imageLoadErrorMessage?: React.ReactNode;
     onAfterOpen?(): void;
     discourageDownloads?: boolean;
@@ -29,11 +31,14 @@ export interface ILightBoxProps {
     imagePadding?: number;
     clickOutsideToClose?: boolean;
     enableZoom?: boolean;
+    enableRotation?: boolean;
     wrapperClassName?: string;
     nextLabel?: string;
     prevLabel?: string;
     zoomInLabel?: string;
     zoomOutLabel?: string;
+    rotateAntiClockwiseLabel?: string;
+    rotateClockwiseLabel?: string;
     closeLabel?: string;
 }
 

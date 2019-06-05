@@ -1231,6 +1231,7 @@ class ReactImageLightbox extends Component {
       clickOutsideToClose,
       discourageDownloads,
       enableZoom,
+      enableRotation,
       imageTitle,
       nextSrc,
       prevSrc,
@@ -1354,7 +1355,7 @@ class ReactImageLightbox extends Component {
               onDoubleClick={this.handleImageDoubleClick}
               onWheel={this.handleImageMouseWheel}
               onDragStart={e => e.preventDefault()}
-              style={{ ...restImageStyle, transform: `rotateZ(${this.props.imageRotationDeg % 360}deg) ${transformParts.scale3d}` }}
+              style={{ ...restImageStyle, transform: `rotateZ(${this.props.imageRotationDeg}deg) ${transformParts.scale3d}`, transition: "transform .3s" }}
               src={imageSrc}
               key={imageSrc + keyEndings[srcType]}
               alt={typeof imageTitle === 'string' ? imageTitle : translate('Image')}
@@ -1522,6 +1523,50 @@ class ReactImageLightbox extends Component {
                   </li>
                 ))}
 
+              {enableRotation && (
+                <li className="ril-toolbar__item ril__toolbarItem">
+                    <button // Lightbox rotate anti-clockwise button
+                      type="button"
+                      key="rotate-90"
+                      aria-label={this.props.rotateAntiClockwiseLabel}
+                      className={[
+                        'ril-rotate-anticlockwise',
+                        'ril__toolbarItemChild',
+                        'ril__builtinButton',
+                        'ril__rotateAntiClockwiseButton',
+                      ].join(' ')}
+                      disabled={this.isAnimating()}
+                      onClick={
+                        !this.isAnimating()
+                          ? this.props.onRotateAntiClockwise
+                          : undefined
+                      }
+                    />
+                </li>
+              )}
+
+              {enableRotation && (
+                <li className="ril-toolbar__item ril__toolbarItem">
+                    <button // Lightbox rotate clockwise button
+                      type="button"
+                      key="rotate-90"
+                      aria-label={this.props.rotateClockwiseLabel}
+                      className={[
+                        'ril-rotate-clockwise',
+                        'ril__toolbarItemChild',
+                        'ril__builtinButton',
+                        'ril__rotateClockwiseButton',
+                      ].join(' ')}
+                      disabled={this.isAnimating()}
+                      onClick={
+                        !this.isAnimating()
+                          ? this.props.onRotateClockwise
+                          : undefined
+                      }
+                    />
+                </li>
+              )}
+
               {enableZoom && (
                 <li className="ril-toolbar__item ril__toolbarItem">
                   <button // Lightbox zoom in button
@@ -1664,6 +1709,12 @@ ReactImageLightbox.propTypes = {
   // Open window event
   onAfterOpen: PropTypes.func,
 
+  // Called when the rotate clockwise toolbar button is clicked
+  onRotateAntiClockwise: PropTypes.func,
+
+  // Called when the rotate clockwise toolbar button is clicked
+  onRotateClockwise: PropTypes.func,
+
   //-----------------------------
   // Download discouragement settings
   //-----------------------------
@@ -1736,6 +1787,9 @@ ReactImageLightbox.propTypes = {
   // Set to false to disable zoom functionality and hide zoom buttons
   enableZoom: PropTypes.bool,
 
+  // Set to true to enable image rotation functionality and show rotation buttons
+  enableRotation: PropTypes.bool,
+
   // Override props set on react-modal (https://github.com/reactjs/react-modal)
   reactModalProps: PropTypes.shape({}),
 
@@ -1744,6 +1798,8 @@ ReactImageLightbox.propTypes = {
   prevLabel: PropTypes.string,
   zoomInLabel: PropTypes.string,
   zoomOutLabel: PropTypes.string,
+  rotateAntiClockwiseLabel: PropTypes.string,
+  rotateClockwiseLabel: PropTypes.string,
   closeLabel: PropTypes.string,
 
   imageLoadErrorMessage: PropTypes.node,
@@ -1761,6 +1817,7 @@ ReactImageLightbox.defaultProps = {
   closeLabel: 'Close lightbox',
   discourageDownloads: false,
   enableZoom: true,
+  enableRotation: false,
   imagePadding: 10,
   imageRotationDeg: 0,
   imageCrossOrigin: null,
@@ -1775,6 +1832,8 @@ ReactImageLightbox.defaultProps = {
   onImageLoad: () => {},
   onMoveNextRequest: () => {},
   onMovePrevRequest: () => {},
+  onRotateAntiClockwise: () => {},
+  onRotateClockwise: () => {},
   prevLabel: 'Previous image',
   prevSrc: null,
   prevSrcThumbnail: null,
@@ -1782,6 +1841,8 @@ ReactImageLightbox.defaultProps = {
   wrapperClassName: '',
   zoomInLabel: 'Zoom in',
   zoomOutLabel: 'Zoom out',
+  rotateAntiClockwiseLabel: 'Rotate anti-clockwise',
+  rotateClockwiseLabel: 'Rotate clockwise',
   imageLoadErrorMessage: 'This image failed to load',
 };
 
