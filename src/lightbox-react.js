@@ -1650,6 +1650,8 @@ class ReactImageLightbox extends Component {
             </div>
           )}
         </div>
+
+        {this.props.extraContent}
       </Modal>
     );
   }
@@ -1781,6 +1783,9 @@ ReactImageLightbox.propTypes = {
   // Other
   //-----------------------------
 
+  // Extra content to render inside the modal
+  extraContent: PropTypes.node,
+
   // Array of custom toolbar buttons
   toolbarButtons: PropTypes.arrayOf(PropTypes.node),
 
@@ -1821,6 +1826,7 @@ ReactImageLightbox.defaultProps = {
   discourageDownloads: false,
   enableZoom: true,
   enableRotation: false,
+  extraContent: null,
   imagePadding: 10,
   imageRotationDeg: 0,
   imageCrossOrigin: null,

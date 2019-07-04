@@ -32,6 +32,7 @@ export interface ILightBoxProps {
     clickOutsideToClose?: boolean;
     enableZoom?: boolean;
     enableRotation?: boolean;
+    extraContent?: React.ReactNode;
     wrapperClassName?: string;
     nextLabel?: string;
     prevLabel?: string;
