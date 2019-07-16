@@ -298,10 +298,8 @@ class ReactImageLightbox extends Component {
 
       fitSizes = this.getFitSizes(width, height);
 
-      widestImageDimension = Math.max(
-        this.imageCache[imageSrc].width,
-        this.imageCache[imageSrc].height,
-      );
+      widestImageDimension = this.imageCache[imageSrc].width;
+      
     } else if (this.isImageLoaded(this.props[`${srcType}Thumbnail`])) {
       // Fall back to using thumbnail if the image has not been loaded
       imageSrc = this.props[`${srcType}Thumbnail`];
