@@ -299,7 +299,7 @@ class ReactImageLightbox extends Component {
       fitSizes = this.getFitSizes(width, height);
 
       widestImageDimension = this.imageCache[imageSrc].width;
-      
+
     } else if (this.isImageLoaded(this.props[`${srcType}Thumbnail`])) {
       // Fall back to using thumbnail if the image has not been loaded
       imageSrc = this.props[`${srcType}Thumbnail`];
@@ -1775,7 +1775,10 @@ ReactImageLightbox.propTypes = {
   //-----------------------------
 
   // Set z-index style, etc., for the parent react-modal (format: https://github.com/reactjs/react-modal#styles )
-  reactModalStyle: PropTypes.shape({}),
+  reactModalStyle: PropTypes.shape({
+    overlay: PropTypes.any,
+    content: PropTypes.any
+  }),
 
   // Padding (px) between the edge of the window and the lightbox
   imagePadding: PropTypes.number,
